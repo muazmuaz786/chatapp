@@ -196,7 +196,7 @@
     <script>
         const username = "{{ username }}";
         let group = "{{ group }}";
-        let socket = new WebSocket(`ws://https://web-production-af4f.up.railway.app//ws/chat/?username=${username}&group=${group}`);
+        let socket = new WebSocket(`wss://https://web-production-af4f.up.railway.app//ws/chat/?username=${username}&group=${group}`);
 
         document.getElementById('chat-title').innerText = `Group: ${group}`;
 
