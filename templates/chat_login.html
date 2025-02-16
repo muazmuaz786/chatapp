@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2b2d31;
+            color: white;
+        }
+
+        .login-container {
+            width: 350px;
+            padding: 20px;
+            background-color: #313338;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            background-color: #40444B;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #5865F2;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4752C4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Enter Chat</h2>
+        <input type="text" id="username" placeholder="enter your name">
+        <input type="text" id="group" placeholder="which group you want to enter">
+        <button onclick="joinChat()">Enter</button>
+    </div>
+
+    <script>
+        function joinChat() {
+            const username = document.getElementById("username").value.trim();
+            const group = document.getElementById("group").value.trim();
+            
+            if (username === "" || group === "") {
+                alert("write in all of the boxes");
+                return;
+            }
+
+            window.location.href = `/chat/${group}/${username}/`;
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title class="chat">Chat Room</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2b2d31;
+            color: white;
+        }
+
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            background-color: #313338;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #202225;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #change-group-btn {
+            font-size: 12px;
+            background-color: #5865F2;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #group-form {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background-color: #2b2d31;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            width: 300px;
+        }
+
+        .group-form-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #group-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            margin-top: 10px;
+            font-size: 14px;
+            background-color: #40444B;
+            color: white;
+        }
+
+        #confirm-group-btn {
+            background-color: #5865F2;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .sent {
+            background-color: #5865F2;
+            color: white;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .received {
+            background-color: #40444B;
+            color: white;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #202225;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            background-color: #40444B;
+            color: white;
+        }
+
+        #send-btn {
+            margin-left: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #5865F2;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #send-btn:hover {
+            background-color: #4752C4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <span id="chat-title">Group: {{ group }}</span>
+            <button id="change-group-btn">Change Group</button>
+        </div>
+        <div id="chat-box"></div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="write a message!">
+            <button id="send-btn">send</button>
+        </div>
+    </div>
+
+    <!-- 그룹 변경 폼 -->
+    <div id="group-form">
+        <div class="group-form-header">
+            <span>Change Group</span>
+            <button class="close-btn" id="close-group-btn">✖</button>
+        </div>
+        <input type="text" id="group-input" placeholder="새로운 그룹 입력">
+        <button id="confirm-group-btn">OK</button>
+    </div>
+
+    <script>
+        const username = "{{ username }}";
+        let group = "{{ group }}";
+        let socket = new WebSocket(`ws://127.0.0.1:8000/ws/chat/?username=${username}&group=${group}`);
+
+        document.getElementById('chat-title').innerText = `Group: ${group}`;
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const chatBox = document.getElementById("chat-box");
+
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message");
+
+            if (data.sender === username) {
+                messageDiv.classList.add("sent");
+            } else {
+                messageDiv.classList.add("received");
+            }
+
+            messageDiv.innerHTML = `<strong>${data.sender}</strong>: ${data.message}`;
+            chatBox.appendChild(messageDiv);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("message-input");
+            const message = input.value.trim();
+            if (message !== "") {
+                socket.send(JSON.stringify({ message: message }));
+                input.value = "";
+            }
+        }
+
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('message-input').addEventListener('keypress', function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        // 그룹 변경 버튼 클릭 시 폼 표시
+        document.getElementById('change-group-btn').addEventListener('click', function() {
+            document.getElementById('group-form').style.display = 'flex';
+        });
+
+        // 확인 버튼 클릭 시 그룹 변경
+        document.getElementById('confirm-group-btn').addEventListener('click', function() {
+            const newGroup = document.getElementById('group-input').value.trim();
+            if (newGroup && newGroup !== group) {
+                window.location.href = `/chat/${newGroup}/${username}/`;
+            }
+        });
+
+        // X 버튼 클릭 시 그룹 변경 창 닫기
+        document.getElementById('close-group-btn').addEventListener('click', function() {
+            document.getElementById('group-form').style.display = 'none';
+        });
+    </script>
+
+</body>
+</html>
